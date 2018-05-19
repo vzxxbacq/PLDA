@@ -191,7 +191,7 @@ class PldaEstimation(object):
     def estimate(self, config, Plda_ouput):
         for i in range(config.num_em_iters):
             print("Plda estimation %d of %d" % i, config.num_em_iters)
-            self.estimate_one_iter
+            self.estimate_one_iter()
     
     def compute_object_function_part1(self):
         within_class_count = self.stats.example_weight - self.stats.class_weight
@@ -287,7 +287,7 @@ class PldaEstimation(object):
         # tmp_between = Plda_output.transform * self.between_var * Plda_output.transform.T
 
         Plda_output.compute_derived_vars()
-
+        return Plda_output
 
 class PldaUnsupervisedAdaptorConfig(object):
     def __init__(self, 
@@ -339,6 +339,7 @@ class PldaUnsupervisedAdaptor(object):
         for i in range(dim):
             within = Wproj2[i][i]
             between = Bproj2[i][i]
+            # Problem
             if s[i] > 1.0:
                 excess_eig = s[i] - 1.0
                 excess_within_covar = excess_eig * config.within_covar_scale
