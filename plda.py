@@ -74,6 +74,7 @@ class PLDA(object):
         self.dim = 0
 
     def transform_ivector(self, config, ivector, num_example):
+        self.dim = ivector.shape[-1]
         transformed_ivec = self.offset
         transformed_ivec = 1.0 * self.transform * ivector + 1.0 * self.transform
         if(config.simple_length_norm):
@@ -87,6 +88,7 @@ class PLDA(object):
 
     def log_likelihood_ratio(self, transform_train_ivector, num_utts, 
         transform_test_ivector):
+        self.dim = transform_train_ivector.shape[-1]
         mean = np.zeros(self.dim)
         variance = np.zeros(self.dim)
         for i in range(self.dim):
@@ -188,7 +190,7 @@ class PldaEstimation(object):
         self.within_var_stats = np.zeros(Pldastats.dim)
         self.within_var_count = 0
 
-    def estimate(self, config, Plda_ouput):
+    def estimate(self, config):
         for i in range(config.num_em_iters):
             print("Plda estimation %d of %d" % i, config.num_em_iters)
             self.estimate_one_iter()
@@ -218,10 +220,10 @@ class PldaEstimation(object):
                                                   + mean.T * combined_inv_var * mean) 
                 
     def estimate_one_iter(self):
-        self.reset_per_iter_stats
-        self.get_stats_from_intraclass
-        self.get_stats_from_class_mean
-        self.estimate_from_stats
+        self.reset_per_iter_stats()
+        self.get_stats_from_intraclass()
+        self.get_stats_from_class_mean()
+        self.estimate_from_stats()
 
     def compute_object_function(self):
         ans1 = self.compute_object_function_part1
