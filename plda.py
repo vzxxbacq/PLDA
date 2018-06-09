@@ -7,12 +7,22 @@ M_LOG_2PI = 1.8378770664093454835606594728112
 
 
 class Pldaconfig(object):
+    """
+    docstring here
+        :param object: 
+    """
     def __init__(self, normalize_length=True, simple_length_norm=False):
         self.normalize_length = normalize_length
         self.simple_length_norm = simple_length_norm
 
 
 class ClassInfo(object):
+    """
+    记录每个说话人的信息
+    weight: 数组，表示权重
+    num_example: 语句数
+    mean: 均值
+    """
     def __init__(self, weight=0, num_example=0, mean=0):
         self.weight = weight
         self.num_example = num_example
@@ -20,6 +30,13 @@ class ClassInfo(object):
 
 
 class PldaStats(object):
+    """
+    用于记录PLDA模型信息的类
+    
+    Add_sample: 添加类
+    is_sorted: 判断是否排好序
+    sorted: 用于svd后排序
+    """
     def __init__(self, dim):
         self.dim_ = dim
         self.num_example = 0
@@ -66,6 +83,13 @@ class PldaStats(object):
 
 
 class PLDA(object):
+    """
+    用于PLDA计算的类:
+    transform_ivector: 对数据进行转换
+    log_likelihood_ratio: 对已经注册的语句与待测试的数据进行对数似然概率计算
+    smooth_within_class_covariance: 类内方差平滑
+    apply_transform: 对输入进行变换
+    """
     def __init__(self):
         self.mean = 0
         self.transform = 0
@@ -175,11 +199,17 @@ class PLDA(object):
 
 
 class PldaEstimationConfig(object):
+    """
+    设置最大步长
+    """
     def __init__(self, num_em_iters=10):
         self.num_em_iters = num_em_iters
 
 
 class PldaEstimation(object):
+    """
+    EM迭代的类，输入为PLDAstats, 使用estimate函数训练，get_output获得PLDA模型
+    """
     def __init__(self, Pldastats):
         self.stats = Pldastats
         self.dim = Pldastats.dim
@@ -273,7 +303,8 @@ class PldaEstimation(object):
         self.within_var = (1.0 / self.within_var_count) * self.within_var_stats
         self.between_var = (1.0 / self.between_var_count) * self.between_var_stat
 
-    def get_output(self, Plda_output):
+    def get_output(self):
+        Plda_output = PLDA()
         Plda_output.mean = (1.0 / self.stats.class_weight) * self.stats.mean
         transform1 = compute_normalizing_transform(self.within_var)
         between_var_proj = transform1 * self.between_var * transform1.T
@@ -292,6 +323,9 @@ class PldaEstimation(object):
         return Plda_output
 
 class PldaUnsupervisedAdaptorConfig(object):
+    """
+    自适应的参数
+    """
     def __init__(self, 
                  mean_diff_scale=1.0,
                  within_covar_scale=0.3,
@@ -302,6 +336,9 @@ class PldaUnsupervisedAdaptorConfig(object):
 
 
 class PldaUnsupervisedAdaptor(object):
+    """
+    通过Add_stats将新的数据添加进来，通过update_plda进行更新
+    """
     def __init__(self):
         self.tot_weight = 0
         self.mean_stats = np.zeros([])
@@ -339,9 +376,6 @@ class PldaUnsupervisedAdaptor(object):
         Wproj2mod = Wproj2
         Bproj2mod = Bproj2
         for i in range(dim):
-            within = Wproj2[i][i]
-            between = Bproj2[i][i]
-            # Problem
             if s[i] > 1.0:
                 excess_eig = s[i] - 1.0
                 excess_within_covar = excess_eig * config.within_covar_scale
